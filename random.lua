@@ -1,13 +1,21 @@
-math.randomseed(os.time() * 2^10)
 local random = math.random
 local _seed = nil
+
+local function seed(value)
+  if value == nil then
+    return _seed
+  end
+  _seed = value
+  math.randomseed(_seed)
+  return _seed
+end
 
 local function choice(sequence)
   local seq_type = type(sequence)
   if seq_type == "number" then
     return random(sequence)
   elseif seq_type == "string" or seq_type == "table" then
-    r_index = random(#sequence)
+    local r_index = random(#sequence)
     return sequence[r_index], r_index
   else
     error "`choice` requires parameter to be an iterable sequence."
@@ -27,17 +35,42 @@ local function shuffle(sequence)
   return sequence
 end
 
-local function seed(value)
-  if value == nil then
-    return _seed
+local function choices(sequence)
+  local routine = coroutine.create(function ()
+      while true do
+        local r_index = random(#sequence)
+        coroutine.yield(sequence[r_index], r_index)
+      end
+  end)
+  return function ()
+    local code, result = coroutine.resume(routine)
+    return result
   end
-  _seed = value
-  math.randomseed(_seed)
-  return _seed
+end
+
+local function sample(sequence, size, replace)
+  local length = #sequence
+  assert(size <= length and size >= 0, "The sample size was larger than population.")
+  local result, pool = {}, {}
+  if replace == nil then
+    replace = false
+  end
+  for i = 1, size do
+    local idx
+    repeat
+      idx = random(length)
+      print(idx, replace, pool[idx])
+    until (replace == true or pool[idx] == nil)
+    result[i] = sequence[idx]
+    pool[idx] = true
+  end
+  return result
 end
 
 return {
+  seed = seed,
   choice = choice,
   shuffle = shuffle,
-  seed = seed
+  choices = choices,
+  sample = sample
 }
