@@ -1,5 +1,6 @@
 local random = math.random
 local _seed = nil
+local version = "1.0-0"
 
 local function seed(value)
   if value == nil then
@@ -68,6 +69,7 @@ local function sample(sequence, size, replace)
 end
 
 return {
+  _VERSION = version,
   seed = seed,
   choice = choice,
   shuffle = shuffle,
