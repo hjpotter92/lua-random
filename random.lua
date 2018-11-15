@@ -1,6 +1,6 @@
 local random = math.random
 local _seed = nil
-local version = "1.0-0"
+local version = "1.1-0"
 
 local function seed(value)
   if value == nil then
@@ -51,16 +51,15 @@ end
 
 local function sample(sequence, size, replace)
   local length = #sequence
-  assert(size <= length and size >= 0, "The sample size was larger than population.")
-  local result, pool = {}, {}
   if replace == nil then
     replace = false
   end
+  assert((size <= length and size >= 0) or replace, "The sample size was larger than population.")
+  local result, pool = {}, {}
   for i = 1, size do
     local idx
     repeat
       idx = random(length)
-      print(idx, replace, pool[idx])
     until (replace == true or pool[idx] == nil)
     result[i] = sequence[idx]
     pool[idx] = true
